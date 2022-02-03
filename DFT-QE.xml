@@ -1,0 +1,115 @@
+<WaNoTemplate>
+    
+    <WaNoMeta>
+ 		<Author>
+  			<Name> Celso R. C. Rego </Name>
+  			<Email>celsorego@kit.edu</Email>
+ 		</Author>
+
+		<Description>
+			This WaNo performs the DFT calculation using 
+			Quantum Espresso code. Here all the inputs files 
+			might be automatically generated or loaded after 
+			reading the geometry file in .cif format. In this WaNo, the 
+			pseudopotentials are automatically generated after the 
+			chemical species specification.
+ 		</Description>
+
+ 		<Keyword>DFT</Keyword>
+	</WaNoMeta>
+	
+	
+	<WaNoRoot name="Q-ESPRESSO">
+		<WaNoTabs name="TABS">
+			<WaNoGroup name="SETUP">
+				<WaNoDictBox name="Initial structure">
+					<WaNoString name="System name" >System</WaNoString>
+					<WaNoFile logical_filename="initial_structure.cif" name="Structure file"> Structure in .cif format</WaNoFile>
+				</WaNoDictBox>
+
+				<WaNoDictBox name="CONTROL SYSTEM ELECTRONS IONS">
+					<WaNoDropDown name="calculation">
+						<Entry id="0" chosen="True">scf</Entry>
+						<Entry id="1">relax</Entry>
+						<Entry id="2">md</Entry>
+						<Entry id="3">bands</Entry>
+						<Entry id="4">vc-relax</Entry>
+					</WaNoDropDown>
+
+					<WaNoFloat name="ecutwfc" description = 'kinetic energy cutoff (Ry) for wavefunctions'>30.0</WaNoFloat>
+					<WaNoInt name="Spin" description = "2 for spin-polarized and 1 for non-spin-polarized calculations">1</WaNoInt>
+
+					<WaNoDropDown name="diagonalization" description = "david: Davidson iterative diag, cg: Conjugate-gradient-like band-by-band, ppcg: PPCG iterative diag">
+						<Entry id="0" chosen="True">cg</Entry>
+						<Entry id="1">david</Entry>
+						<Entry id="2">ppcg</Entry>
+						<Entry id="3">paro</Entry>
+					</WaNoDropDown>
+
+					<WaNoDropDown name="ion dynamics" description = "Specify the type of ionic dynamics">
+						<Entry id="0" chosen="True">bfgs</Entry>
+						<Entry id="1">damp</Entry>
+					</WaNoDropDown>	
+
+					<WaNoDropDown name="Functional" description = "available functionals">
+						<Entry id="0" chosen="True">PBE</Entry>
+						<Entry id="1">PBE0</Entry>
+						<Entry id="2">B3LYP</Entry>
+						<Entry id="3">PW91</Entry>
+					</WaNoDropDown>
+
+					<WaNoDropDown name="vdw_corr" description = "vdW corrections">
+						<Entry id="0" chosen="True">0</Entry>
+						<Entry id="1">D2</Entry>
+						<Entry id="2">D3</Entry>
+						<Entry id="3">TS</Entry>
+						<Entry id="4">MBD</Entry>
+					</WaNoDropDown>
+				</WaNoDictBox>
+
+				<WaNoDictBox name="KPOINTS">
+					<WaNoMatrixFloat rows="2" cols="3" col_header="N1; N2; N3" row_header="kpts; shift" name="Monkhorst" description= "kpts(1,1,1): QE will use routines optimized for Γ-point-only calculations. shift: set to 0 or 1 to displace the kpoint grid by a half cell in that direction">[[1,1,1], [0,0,0]]</WaNoMatrixFloat>
+				</WaNoDictBox>
+			</WaNoGroup>
+
+			<WaNoGroup name="Properties">
+
+			<WaNoBool name="properties">False</WaNoBool>	
+
+			<WaNoMultipleOf visibility_condition="%s == True" visibility_var_path="TABS.Properties.properties" name="Var-properties">
+				<Element id="0">
+					<WaNoString name="var-name">total_energy</WaNoString>
+				</Element>
+			</WaNoMultipleOf>
+
+			<WaNoBool name="Import Inputs">False</WaNoBool>
+				<WaNoFile logical_filename="Inputs.yml" visibility_condition="%s == True"
+				visibility_var_path="TABS.Properties.Import Inputs" name="inputs.yml">inputs.yml</WaNoFile>	
+
+			</WaNoGroup>
+
+		</WaNoTabs>
+
+	</WaNoRoot>
+	
+	<WaNoExecCommand>
+		source  /home/ws/gt5111/miniconda3/etc/profile.d/conda.sh
+		conda activate
+		python qe-inputs.py
+
+		mv input.pwi QEIN.in
+		bash run_QE.sh 
+		
+		python qe_results.py
+	</WaNoExecCommand>
+	
+	<WaNoInputFiles>
+		<WaNoInputFile logical_filename="qe-inputs.py">qe-inputs.py</WaNoInputFile>
+		<WaNoInputFile logical_filename="run_QE.sh">run_QE.sh</WaNoInputFile>
+		<WaNoInputFile logical_filename="qe_results.py">qe_results.py</WaNoInputFile>
+	</WaNoInputFiles>
+
+	<WaNoOutputFiles>
+		<WaNoOutputFile>dft_qe_dict.yml</WaNoOutputFile>
+	</WaNoOutputFiles>
+</WaNoTemplate>
