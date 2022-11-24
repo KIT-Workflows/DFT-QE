@@ -3,4 +3,6 @@ source ~/.bashrc
 
 module purge
 module load intel/19.0.5.281
-mpirun /home/ws/gt5111/Celso_QE/qe-6.6/bin/pw.x -inp QEIN.in > QEIN.out
+module load mpich/3.3.1
+
+mpirun /shared/software/chem/qe/7.1/bin/pw.x -inp input.pwi > QEIN.out

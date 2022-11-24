@@ -51,24 +51,29 @@ def pseud_pot(elements):
 
 
 def check_vdW(dict_input):
-
+    dict_vdw = {"D2":'DFT-D',"D3":'DFT-D3',"MBD":'MBD', "TS":'TS', "XDM":'XDM'}
     var_value = dict_input.get('vdw_corr')
-    if var_value == "D2":
-        var_value = 'DFT-D'
-        dict_input['vdw_corr'] = var_value
-    elif var_value == "D3":
-        var_value = 'DFT-D3'
-        dict_input['vdw_corr'] = var_value
-    elif var_value == "MBD":
-        var_value = 'mbd_vdw'
-        dict_input['vdw_corr'] = var_value
-    elif var_value == "TS":
-        var_value = 'TS'
-        dict_input['vdw_corr'] = var_value
+    
+    if var_value in dict_vdw:
+        dict_input['vdw_corr'] = dict_vdw[var_value]
     else:
         del dict_input['vdw_corr']
     
     return dict_input
+
+def inplace_change(filename, old_string, new_string):
+    # Safely read the input filename using 'with'
+    with open(filename) as f:
+        s = f.read()
+        if old_string not in s:
+            print('"{old_string}" not found in {filename}.'.format(**locals()))
+            return
+
+    # Safely write the changed content, if found in the file
+    with open(filename, 'w') as f:
+        print('Changing "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
+        s = s.replace(old_string, new_string)
+        f.write(s)
 
 if __name__ == '__main__':
 
@@ -77,7 +82,7 @@ if __name__ == '__main__':
 
     # Define the ase-espresso keys we will use.
     keys = {
-        'pseudo_dir' : '/home/ws/gt5111/Celso_QE/SSSP_precision',
+        'pseudo_dir' : '/home/ws/gt5111/Celso_QE/SSSP_precision/',
         'pseudopotentials':'H_ONCV_PBE-1.0.oncvpsp.upf',
         'ibrav' : 0,
         'nspin': 1,
@@ -86,9 +91,8 @@ if __name__ == '__main__':
         'ion_dynamics': 'bfgs',
         'ecutwfc': 30.0,
         'input_dft': 'RPBE',
-        'vdw_corr': 'DFT-D',
-        'dftd3_version' : 2,
-        'conv_thr': 1e-7,
+        'vdw_corr': 'none',
+        'conv_thr': 1e-6,
         'diagonalization': 'cg',
         'outdir': '.',
         'output': {'removesave': True},
@@ -99,8 +103,8 @@ if __name__ == '__main__':
         'convergence': {'energy': 1e-5, 'mixing': 0.35}
         }
 
-    keys["title"] = wano_file["TABS"]["SETUP"]["Initial structure"]["System name"]
-    keys["prefix"] = wano_file["TABS"]["SETUP"]["Initial structure"]["System name"]
+    keys["title"] = wano_file["TABS"]["SETUP"]["Initial structure"]["Title"]
+    keys["prefix"] = wano_file["TABS"]["SETUP"]["Initial structure"]["Title"]
 
     # Read the initial geometry
     geometry_name = wano_file["TABS"]["SETUP"]["Initial structure"]["Structure file"]
@@ -111,14 +115,18 @@ if __name__ == '__main__':
     elements = list(set(elements))
     pseudopot = pseud_pot(elements)
 
+    # Adding vdw-correctios
+    keys["vdw_corr"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["vdw-corr"]
+    keys = check_vdW(keys)
+
     keys["calculation"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["calculation"]
     keys["nspin"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["Spin"]
+    
     keys["ecutwfc"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["ecutwfc"]
     keys["input_dft"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["Functional"]
     keys["diagonalization"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["diagonalization"]
-    keys["ion_dynamics"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["ion dynamics"]
-    keys["vdw_corr"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["vdw_corr"]
-    keys = check_vdW(keys)
+    keys["ion_dynamics"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["ion dynamics"] 
+    
     
     mat_n = literal_eval(wano_file["TABS"]["SETUP"]["KPOINTS"]["Monkhorst"])
     n_mesh = [mat_n[0][0], mat_n[0][1], mat_n[0][2]]
@@ -135,7 +143,19 @@ if __name__ == '__main__':
         keys["kpts"] = n_mesh
         keys["koffset"] = [int(item) for item in n_shift]
     
+    if keys["nspin"] > 1:
+#        keys["tot_magnetization"] = 1
+        keys["occupations"] = 'smearing'
+        keys["smearing"] = 'marzari-vanderbilt'
+        keys["degauss"] = 0.01 
+
+
     write('input.pwi', initial_struct, kpts = keys["kpts"], koffset = keys["koffset"], input_data = keys, pseudopotentials = pseudopot)
+
+    if keys["nspin"] > 1:
+        for ii in range(len(elements)):
+            temp_str = str(ii + 1)
+            inplace_change('input.pwi', 'starting_magnetization('+ temp_str +') = 0.0', 'starting_magnetization('+ temp_str +') = 0.5')
 
     # a3 = bulk('Cu', 'fcc', a=3.6, cubic=True)
     # a3 = bulk('NaCl', crystalstructure='rocksalt', a=6.0)

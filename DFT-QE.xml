@@ -23,8 +23,8 @@
 		<WaNoTabs name="TABS">
 			<WaNoGroup name="SETUP">
 				<WaNoDictBox name="Initial structure">
-					<WaNoString name="System name" >System</WaNoString>
-					<WaNoFile logical_filename="initial_structure.cif" name="Structure file"> Structure in .cif format</WaNoFile>
+					<WaNoString name="Title" >Title</WaNoString>
+					<WaNoFile logical_filename="initial_structure.cif" name="Structure file">/home/celso/Wanos_2020/DFT-QE/initial_structure.cif</WaNoFile>
 				</WaNoDictBox>
 
 				<WaNoDictBox name="CONTROL SYSTEM ELECTRONS IONS">
@@ -52,23 +52,25 @@
 					</WaNoDropDown>	
 
 					<WaNoDropDown name="Functional" description = "available functionals">
-						<Entry id="0" chosen="True">PBE</Entry>
-						<Entry id="1">PBE0</Entry>
-						<Entry id="2">B3LYP</Entry>
-						<Entry id="3">PW91</Entry>
+						<Entry id="0" chosen="True">pbe</Entry>
+						<Entry id="1">pbe0</Entry>
+						<Entry id="2">b3lyp</Entry>
+						<Entry id="3">pbesol</Entry>
+						<Entry id="4">revpbe</Entry>
 					</WaNoDropDown>
 
-					<WaNoDropDown name="vdw_corr" description = "vdW corrections">
-						<Entry id="0" chosen="True">0</Entry>
+					<WaNoDropDown name="vdw-corr" description = "vdW corrections">
+						<Entry id="0" chosen="True">none</Entry>
 						<Entry id="1">D2</Entry>
 						<Entry id="2">D3</Entry>
 						<Entry id="3">TS</Entry>
 						<Entry id="4">MBD</Entry>
+						<Entry id="5">XDM</Entry>
 					</WaNoDropDown>
 				</WaNoDictBox>
 
 				<WaNoDictBox name="KPOINTS">
-					<WaNoMatrixFloat rows="2" cols="3" col_header="N1; N2; N3" row_header="kpts; shift" name="Monkhorst" description= "kpts(1,1,1): QE will use routines optimized for Γ-point-only calculations. shift: set to 0 or 1 to displace the kpoint grid by a half cell in that direction">[[1,1,1], [0,0,0]]</WaNoMatrixFloat>
+					<WaNoMatrixFloat rows="2" cols="3" col_header="N1; N2; N3" row_header="kpts; shift" name="Monkhorst" description= "kpts(1,1,1): QE will use routines optimized for Γ-point-only calculations. shift: set to 0 or 1 to displace the kpoint grid by a half cell in that direction">[[4,4,4], [0,0,0]]</WaNoMatrixFloat>
 				</WaNoDictBox>
 			</WaNoGroup>
 
@@ -84,7 +86,7 @@
 
 			<WaNoBool name="Import Inputs">False</WaNoBool>
 				<WaNoFile logical_filename="Inputs.yml" visibility_condition="%s == True"
-				visibility_var_path="TABS.Properties.Import Inputs" name="inputs.yml">inputs.yml</WaNoFile>	
+				visibility_var_path="TABS.Properties.Import Inputs" name="inputs">inputs.yml</WaNoFile>	
 
 			</WaNoGroup>
 
@@ -93,13 +95,12 @@
 	</WaNoRoot>
 	
 	<WaNoExecCommand>
-		source  /home/ws/gt5111/miniconda3/etc/profile.d/conda.sh
-		conda activate
+		export NANOVER=V4
+		source $NANOMATCH/$NANOVER/local_anaconda/bin/activate
+		conda activate simstack_kit
 		python qe-inputs.py
 
-		mv input.pwi QEIN.in
-		bash run_QE.sh 
-		
+		bash run_QE.sh 		
 		python qe_results.py
 	</WaNoExecCommand>
 	
