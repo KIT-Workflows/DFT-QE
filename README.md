@@ -1,4 +1,4 @@
-![DFT-VASP WaNo logo](https://raw.githubusercontent.com/KIT-Workflows/DFT-VASP/main/dft_qe_logo.png)
+![DFT-QE WaNo logo](https://raw.githubusercontent.com/KIT-Workflows/DFT-QE/main/dft_qe_logo.png)
 
 # DFT-QE
 
