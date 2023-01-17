@@ -8,6 +8,14 @@ Let's start exploring your materials' properties with ease and precision! Welcom
 
 <img src="https://raw.githubusercontent.com/KIT-Workflows/DFT-QE/main/GUI_DFT-QE.png" alt="DFT-QE WaNo GUI" width="900"/>
 
+## 1. Python Setup
+To get this WaNo up and running on your available computational resources, make sure to have the below libraries installed on Python 3.6 or newer.
+
+```
+1. Atomic Simulation Environment (ASE).
+2. Python Materials Genomics (Pymatgen).
+3. Numpy, os, sys, re, yaml. 
+```
 
 ## Acknowledgements
 This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 957189. The project is part of BATTERY 2030+, the large-scale European research initiative for inventing the sustainable batteries of the future.
