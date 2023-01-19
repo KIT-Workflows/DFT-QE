@@ -166,5 +166,3 @@ if __name__ == '__main__':
     #atoms.info = keys
     #write_espresso_in('input.in',atoms, kpts=keys["kpts"])
     #write_espresso_in('name.in',atoms,input(keys))
-
-    

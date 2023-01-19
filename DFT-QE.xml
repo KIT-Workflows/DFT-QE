@@ -101,16 +101,16 @@
 		python qe-inputs.py
 
 		bash run_QE.sh 		
-		python qe_results.py
+		python get_properties.py
 	</WaNoExecCommand>
 	
 	<WaNoInputFiles>
 		<WaNoInputFile logical_filename="qe-inputs.py">qe-inputs.py</WaNoInputFile>
 		<WaNoInputFile logical_filename="run_QE.sh">run_QE.sh</WaNoInputFile>
-		<WaNoInputFile logical_filename="qe_results.py">qe_results.py</WaNoInputFile>
+		<WaNoInputFile logical_filename="get_properties.py">get_properties.py</WaNoInputFile>
 	</WaNoInputFiles>
 
 	<WaNoOutputFiles>
-		<WaNoOutputFile>dft_qe_dict.yml</WaNoOutputFile>
+		<WaNoOutputFile>qe_results.yml</WaNoOutputFile>
 	</WaNoOutputFiles>
 </WaNoTemplate>
