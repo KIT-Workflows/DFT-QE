@@ -1,6 +1,6 @@
 ![DFT-QE WaNo logo](https://raw.githubusercontent.com/KIT-Workflows/DFT-QE/main/dft_qe_logo.png)
 
-When publishing results obtained with DFT-QE WaNo, please consider citing it.
+When publishing results obtained with DFT-QE WaNo, please consider citing it [![DOI](https://zenodo.org/badge/455123696.svg)](https://zenodo.org/badge/latestdoi/455123696).
 
 # DFT-QE
 
