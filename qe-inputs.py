@@ -1,8 +1,7 @@
-#from ase.build import bulk
-#from ase import Atoms
 from ase.io import write, read
-import yaml
+import yaml, os
 from ast import literal_eval
+from ase.units import Bohr
 
 def pseud_pot(elements):
 
@@ -42,13 +41,11 @@ def pseud_pot(elements):
         if element in SSSP:
             pseudopot[element] = SSSP[element]
         else:
-            print('There is no pseudopotential for this element:' + element)
+            print(f'There is no pseudopotential for this element:{element}')
             print('Check your pseudopotential folder!!!')
             exit
 
     return pseudopot
-
-
 
 def check_vdW(dict_input):
     dict_vdw = {"D2":'DFT-D',"D3":'DFT-D3',"MBD":'MBD', "TS":'TS', "XDM":'XDM'}
@@ -80,89 +77,138 @@ if __name__ == '__main__':
     with open('rendered_wano.yml') as file:
         wano_file = yaml.full_load(file)
 
-    # Define the ase-espresso keys we will use.
-    keys = {
-        'pseudo_dir' : '/home/ws/gt5111/Celso_QE/SSSP_precision/',
-        'pseudopotentials':'H_ONCV_PBE-1.0.oncvpsp.upf',
-        'ibrav' : 0,
-        'nspin': 1,
-        'prefix': 'h2',
-        'calculation': 'relax',
-        'ion_dynamics': 'bfgs',
-        'ecutwfc': 30.0,
-        'input_dft': 'RPBE',
-        'vdw_corr': 'none',
-        'conv_thr': 1e-6,
-        'diagonalization': 'cg',
-        'outdir': '.',
-        'output': {'removesave': True},
-        'pw': 200,
-        'dw': 2000,
-        'electron_maxstep': 400,
-        'nstep': 200,
-        'convergence': {'energy': 1e-5, 'mixing': 0.35}
+    run_qe = wano_file["TABS"]["SETUP"]["run-QE"]
+
+    if wano_file["TABS"]["SETUP"]["Import Inputs"]:
+        print("loading inputs")
+    else:
+        # Define the ase-espresso keys we will use.
+        keys = {
+            #'pseudo_dir': '/home/ws/gt5111/Celso_QE/SSSP_precision/',
+            'pseudo_dir': '/shared/software/chem/SSSP/1.1.2_PBE_precision',
+            'pseudopotentials': 'H_ONCV_PBE-1.0.oncvpsp.upf',
+            'ibrav': 0,
+            'nspin': 1,
+            'prefix': 'h2',
+            'calculation': 'relax',
+            'ion_dynamics': 'bfgs',
+            'ecutwfc': 40.0,
+            'input_dft': 'RPBE',
+            'vdw_corr': 'none',
+            'conv_thr': 1e-06,
+            'diagonalization': 'cg',
+            'outdir': '.',
+            'output': {'removesave': True},
+            'pw': 200,
+            'dw': 2000,
+            'electron_maxstep': 400,
+            'nstep': 200,
+            'etot_conv_thr': 1e-5,
+            'forc_conv_thr': 1e-8,
+            'convergence': {'energy': 1e-5, 'mixing': 0.35},
+            "title": wano_file["TABS"]["SETUP"]["Initial structure"]["Title"],
+            "prefix": wano_file["TABS"]["SETUP"]["Initial structure"]["Title"],
         }
 
-    keys["title"] = wano_file["TABS"]["SETUP"]["Initial structure"]["Title"]
-    keys["prefix"] = wano_file["TABS"]["SETUP"]["Initial structure"]["Title"]
+        # Read the initial geometry
+        geometry_name = wano_file["TABS"]["SETUP"]["Initial structure"]["Structure file"]
+        initial_struct = read(geometry_name)
 
-    # Read the initial geometry
-    geometry_name = wano_file["TABS"]["SETUP"]["Initial structure"]["Structure file"]
-    initial_struct = read(geometry_name)
-
-    # Defining the pseudopotentials
-    elements = initial_struct.get_chemical_symbols()
-    elements = list(set(elements))
-    pseudopot = pseud_pot(elements)
-
-    # Adding vdw-correctios
-    keys["vdw_corr"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["vdw-corr"]
-    keys = check_vdW(keys)
-
-    keys["calculation"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["calculation"]
-    keys["nspin"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["Spin"]
-    
-    keys["ecutwfc"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["ecutwfc"]
-    keys["input_dft"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["Functional"]
-    keys["diagonalization"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["diagonalization"]
-    keys["ion_dynamics"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["ion dynamics"] 
-    
-    
-    mat_n = literal_eval(wano_file["TABS"]["SETUP"]["KPOINTS"]["Monkhorst"])
-    n_mesh = [mat_n[0][0], mat_n[0][1], mat_n[0][2]]
-    n_shift = [mat_n[1][0], mat_n[1][1], mat_n[1][2]]
-    
-    gamma_point = [1, 1, 1]
-    n_mesh.sort()
-    gamma_point.sort()
-
-    if n_mesh == gamma_point:
-        keys["kpts"] = None
-        keys["koffset"] = None
-    else:    
-        keys["kpts"] = n_mesh
-        keys["koffset"] = [int(item) for item in n_shift]
-    
-    if keys["nspin"] > 1:
-#        keys["tot_magnetization"] = 1
-        keys["occupations"] = 'smearing'
-        keys["smearing"] = 'marzari-vanderbilt'
-        keys["degauss"] = 0.01 
+        # Convert atomic positions to crystal units
+        # cell = initial_struct.get_cell()
+        # positions = initial_struct.get_scaled_positions()
+        #initial_struct.set_scaled_positions(initial_struct.get_scaled_positions())
 
 
-    write('input.pwi', initial_struct, kpts = keys["kpts"], koffset = keys["koffset"], input_data = keys, pseudopotentials = pseudopot)
+        # Defining the pseudopotentials
+        elements = initial_struct.get_chemical_symbols()
+        elements = list(set(elements))
+        pseudopot = pseud_pot(elements)
 
-    if keys["nspin"] > 1:
-        for ii in range(len(elements)):
-            temp_str = str(ii + 1)
-            inplace_change('input.pwi', 'starting_magnetization('+ temp_str +') = 0.0', 'starting_magnetization('+ temp_str +') = 0.5')
+        # Adding vdw-correctios
+        keys["vdw_corr"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["vdw-corr"]
+        keys = check_vdW(keys)
 
-    # a3 = bulk('Cu', 'fcc', a=3.6, cubic=True)
-    # a3 = bulk('NaCl', crystalstructure='rocksalt', a=6.0)
-    # a3.write('NaCl.cif',format='cif')
-    # initial_struct = read('NaCl.cif')
-    
-    
-    #atoms.info = keys
-    #write_espresso_in('input.in',atoms, kpts=keys["kpts"])
-    #write_espresso_in('name.in',atoms,input(keys))
+        keys["calculation"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["calculation"]
+        keys["nspin"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["Spin"]
+
+        keys["ecutwfc"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["ecutwfc"]
+
+        keys["input_dft"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["Functional"]
+        keys["diagonalization"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["diagonalization"]
+        keys["ion_dynamics"] = wano_file["TABS"]["SETUP"]["CONTROL SYSTEM ELECTRONS IONS"]["ion dynamics"] 
+
+
+        mat_n = literal_eval(wano_file["TABS"]["SETUP"]["KPOINTS"]["Monkhorst"])
+        n_mesh = [mat_n[0][0], mat_n[0][1], mat_n[0][2]]
+        n_shift = [mat_n[1][0], mat_n[1][1], mat_n[1][2]]
+
+        gamma_point = [1, 1, 1]
+        n_mesh.sort()
+        gamma_point.sort()
+
+        if n_mesh == gamma_point:
+            keys["kpts"] = None
+            keys["koffset"] = None
+        else:    
+            keys["kpts"] = n_mesh
+            keys["koffset"] = [int(item) for item in n_shift]
+
+        if keys["nspin"] > 1:
+    #        keys["tot_magnetization"] = 1
+            keys["occupations"] = 'smearing'
+            keys["smearing"] = 'marzari-vanderbilt'
+            keys["degauss"] = 0.01 
+
+        if keys["calculation"] == "scf":
+            del keys["ion_dynamics"]
+
+        if run_qe == "thermo_pw.x":
+            keys["ibrav"] = 14
+            keys["ecutrho"] = 6.0*keys["ecutwfc"]
+            keys["occupations"] = 'smearing'
+            keys["smearing"] = 'gauss'
+            keys["degauss"] = 0.01
+            keys["nbnd"] = 60
+            keys["mixing_mode"] = 'plain'
+            keys["mixing_beta"] = 0.5
+
+                
+        write('input.pwi', initial_struct, Crystal=True, kpts = keys["kpts"], koffset = keys["koffset"], input_data = keys, pseudopotentials = pseudopot)
+
+        if keys["nspin"] > 1:
+            for ii in range(len(elements)):
+                temp_str = str(ii + 1)
+                inplace_change(
+                    'input.pwi',
+                    f'starting_magnetization({temp_str}) = 0.0',
+                    f'starting_magnetization({temp_str}) = 0.5',
+                )
+
+    if run_qe == "thermo_pw.x":
+        thermo_control = f'''
+         &INPUT_THERMO
+          what='scf_elastic_constants',
+         /
+        '''
+        with open('thermo_control', 'w') as f:
+            f.write(thermo_control)
+
+    bash_script_content = f'''
+    #!/bin/bash
+    source ~/.bashrc
+
+    module purge
+    module load intel/19.0.5.281
+    module load mpich/3.3.1
+
+    mpirun /home/ws/gt5111/Celso_QE/qe-7.1/bin/{run_qe} -inp input.pwi > QEIN.out
+    '''
+
+    # Create a new bash script file and write the content
+    bash_script_filename = 'run_QE.sh'
+    with open(bash_script_filename, 'w') as f:
+        f.write(bash_script_content)
+
+    # Change the permissions of the bash script file to make it executable
+    os.chmod(bash_script_filename, 0o755)

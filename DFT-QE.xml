@@ -60,9 +60,9 @@
 					</WaNoDropDown>
 
 					<WaNoDropDown name="vdw-corr" description = "vdW corrections">
-						<Entry id="0" chosen="True">none</Entry>
+						<Entry id="0">none</Entry>
 						<Entry id="1">D2</Entry>
-						<Entry id="2">D3</Entry>
+						<Entry id="2" chosen="True">D3</Entry>
 						<Entry id="3">TS</Entry>
 						<Entry id="4">MBD</Entry>
 						<Entry id="5">XDM</Entry>
@@ -70,47 +70,37 @@
 				</WaNoDictBox>
 
 				<WaNoDictBox name="KPOINTS">
-					<WaNoMatrixFloat rows="2" cols="3" col_header="N1; N2; N3" row_header="kpts; shift" name="Monkhorst" description= "kpts(1,1,1): QE will use routines optimized for Γ-point-only calculations. shift: set to 0 or 1 to displace the kpoint grid by a half cell in that direction">[[4,4,4], [0,0,0]]</WaNoMatrixFloat>
+					<WaNoMatrixFloat rows="2" cols="3" col_header="N1; N2; N3" row_header="kpts; shift" name="Monkhorst" description= "kpts(1,1,1): QE will use routines optimized for Γ-point-only calculations. shift: set to 0 or 1 to displace the kpoint grid by a half cell in that direction">[[6,6,6], [0,0,0]]</WaNoMatrixFloat>
 				</WaNoDictBox>
+
+				<WaNoDropDown name="run-QE">
+					<Entry id="0" chosen="True">pw.x</Entry>
+					<Entry id="1">thermo_pw.x</Entry>
+					<Entry id="2">pw2wannier90.x</Entry>
+				</WaNoDropDown>
+
+				<WaNoBool name="Import Inputs" description="The QE input file will overwrite the above parameters by clicking this option">False</WaNoBool>
+				<WaNoFile logical_filename="input.pwi" visibility_condition="%s == True"
+				visibility_var_path="TABS.SETUP.Import Inputs" name="input">/home/celso/Desktop/Project/HFrota/liza-pura-constantes-elasticas/liza-pura/int_liza.scf.in</WaNoFile>
 			</WaNoGroup>
 
-			<WaNoGroup name="Properties">
-
-			<WaNoBool name="properties">False</WaNoBool>	
-
-			<WaNoMultipleOf visibility_condition="%s == True" visibility_var_path="TABS.Properties.properties" name="Var-properties">
-				<Element id="0">
-					<WaNoString name="var-name">total_energy</WaNoString>
-				</Element>
-			</WaNoMultipleOf>
-
-			<WaNoBool name="Import Inputs">False</WaNoBool>
-				<WaNoFile logical_filename="Inputs.yml" visibility_condition="%s == True"
-				visibility_var_path="TABS.Properties.Import Inputs" name="inputs">inputs.yml</WaNoFile>	
-
-			</WaNoGroup>
 
 		</WaNoTabs>
 
 	</WaNoRoot>
 	
 	<WaNoExecCommand>
-		export NANOVER=V4
-		source $NANOMATCH/$NANOVER/local_anaconda/bin/activate
-		conda activate simstack_kit
-		python qe-inputs.py
-
-		bash run_QE.sh 		
-		python get_properties.py
+		bash config.sh
 	</WaNoExecCommand>
 	
 	<WaNoInputFiles>
+		<WaNoInputFile logical_filename="config.sh">config.sh</WaNoInputFile>
 		<WaNoInputFile logical_filename="qe-inputs.py">qe-inputs.py</WaNoInputFile>
-		<WaNoInputFile logical_filename="run_QE.sh">run_QE.sh</WaNoInputFile>
 		<WaNoInputFile logical_filename="get_properties.py">get_properties.py</WaNoInputFile>
 	</WaNoInputFiles>
 
 	<WaNoOutputFiles>
 		<WaNoOutputFile>qe_results.yml</WaNoOutputFile>
+		<WaNoOutputFile>geometry.cif</WaNoOutputFile>
 	</WaNoOutputFiles>
 </WaNoTemplate>

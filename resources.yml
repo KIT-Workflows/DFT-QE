@@ -1,15 +1,1 @@
-- - true
-  - CPUs per Node
-  - 1
-- - true
-  - Number of Nodes
-  - 1
-- - true
-  - Memory [MB]
-  - 1024
-- - true
-  - Time [Wall]
-  - 20
-- - true
-  - Queue
-  - short
+{"resource_name": "<Connected Server>", "walltime": "400000", "cpus_per_node": "16", "nodes": "1", "queue": "batch", "memory": "32000", "custom_requests": "", "base_URI": "", "port": "22", "username": "", "basepath": "simstack_workspace", "queueing_system": "slurm", "sw_dir_on_resource": "/home/nanomatch/nanomatch", "extra_config": "None Required (default)", "ssh_private_key": "UseSystemDefault", "sge_pe": "", "reuse_results": "False"}

@@ -1,0 +1,18 @@
+TABS:
+  SETUP:
+    CONTROL SYSTEM ELECTRONS IONS:
+      Functional: pbe
+      Spin: 1
+      calculation: scf
+      diagonalization: cg
+      ecutwfc: 30.0
+      ion dynamics: bfgs
+      vdw-corr: D3
+    Import Inputs: false
+    Initial structure:
+      Structure file: initial_structure.cif
+      Title: Title
+    KPOINTS:
+      Monkhorst: '[ [  6.0 , 6.0 , 6.0 ] , [  0.0 , 0.0 , 0.0 ] ] '
+    input: input.pwi
+    run-QE: thermo_pw.x

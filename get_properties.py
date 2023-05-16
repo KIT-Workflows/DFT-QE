@@ -1,4 +1,4 @@
-from ase.io import read
+from ase.io import read, write
 import yaml, re, datetime
 from ase.cell import Cell
 import numpy as np
@@ -198,26 +198,22 @@ if __name__ == '__main__':
 
     ut = Util_tricks()
     ut.metadata(results_dict)
-    
 
-    properties_qe = QE_properties(properties_bool, results_dict)
+    with open('geometry.cif', 'w') as f:
+        f.write('Empty file')
     
-    results_dict = properties_qe.get_qe_properties()
+    if wano_file["TABS"]["SETUP"]["run-QE"] == "pw.x":
+        properties_qe = QE_properties(properties_bool, results_dict)
+        results_dict = properties_qe.get_qe_properties()
 
-    # with open("qe_results.yml","w") as out:
-    #     yaml.dump(results_dict, out, default_flow_style=False)
+        atoms = read('QEIN.out', format='espresso-out')
+        # Write to a .cif file
+        write('geometry.cif', atoms)
 
     with open('rendered_wano.yml') as file:
         wano_file = yaml.full_load(file)
 
-    # with open('qe_results.yml') as file:
-    #     vasp_file = yaml.full_load(file)
-
     wano_file = {**wano_file, **results_dict}
 
     with open("qe_results.yml", "w") as out:
-        yaml.dump(wano_file, out, default_flow_style=False)
-    
-    # with open("db_vasp_results.yml", "w") as out:
-    #     yaml.dump(wano_file, out, default_flow_style=False)
-    
+        yaml.dump(wano_file, out, default_flow_style=False)    
