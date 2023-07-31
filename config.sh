@@ -5,7 +5,7 @@
 # conda_activate=$(grep -Po '(?<=conda": ")[^"]*' conda_env.yml)
 
 # execute the command using the extracted values
-source set your conda path /home/../conda/etc/profile.d/conda.sh
+source /home/ws/gt5111/miniconda3/etc/profile.d/conda.sh
 conda activate
 
 python qe-inputs.py

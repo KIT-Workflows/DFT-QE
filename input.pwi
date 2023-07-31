@@ -1,0 +1,69 @@
+&CONTROL
+   calculation      = 'scf'
+   title            = 'Title'
+   nstep            = 200
+   outdir           = '.'
+   prefix           = 'Title'
+   pseudo_dir       = '/shared/software/chem/SSSP/1.1.2_PBE_precision'
+/
+&SYSTEM
+   ibrav            = 14
+   nbnd             = 60
+   ecutwfc          = 30.0
+   ecutrho          = 180.0
+   occupations      = 'smearing'
+   degauss          = 0.01
+   smearing         = 'gauss'
+   nspin            = 1
+   input_dft        = 'pbe'
+   vdw_corr         = 'DFT-D3'
+   ntyp             = 4
+   nat              = 18
+   celldm(1)        = 9.970213978821095
+   celldm(2)        = 0.9999999999999998
+   celldm(3)        = 1.3489606729327654
+   celldm(4)        = 0.0
+   celldm(5)        = 0.0
+   celldm(6)        = -0.49999999999999983
+/
+&ELECTRONS
+   electron_maxstep = 400
+   conv_thr         = 1e-06
+   mixing_mode      = 'plain'
+   mixing_beta      = 0.5
+   diagonalization  = 'cg'
+/
+&IONS
+/
+&CELL
+/
+
+ATOMIC_SPECIES
+Si 28.085 Si.pbe-n-rrkjus_psl.1.0.0.UPF
+Mg 24.305 mg_pbe_v1.4.uspp.F.UPF
+O 15.999 O.pbe-n-kjpaw_psl.0.1.UPF
+H 1.008 H_ONCV_PBE-1.0.oncvpsp.upf
+
+K_POINTS automatic
+6.0 6.0 6.0  0 0 0
+
+ATOMIC_POSITIONS angstrom
+Si -0.0000263800 3.0461210243 0.5058144291 
+Si 2.6380313801 1.5230376663 0.5058144291 
+Mg 1.7456206686 0.0000000000 3.2943771344 
+Mg -0.8728103343 1.5117518444 3.2943771344 
+Mg 1.7651946657 3.0574068462 3.2943771344 
+O -0.0000263800 3.0461210243 2.1045353410 
+O 2.6380313801 1.5230376663 2.1045353410 
+O 2.7560821038 0.0000000000 6.9940036510 
+O -1.3780410519 2.3868371168 6.9940036510 
+O 1.2599639481 2.1823215738 6.9940036510 
+O 3.5132422989 0.0000000000 4.2632320413 
+O -1.7566211494 3.0425570805 4.2632320413 
+O 0.8813838506 1.5266016101 4.2632320413 
+O 0.0000000000 0.0000000000 2.1375588242 
+H 3.4256077728 0.0000000000 5.2288130684 
+H -1.7128038864 2.9666633546 5.2288130684 
+H 0.9252011136 1.6024953360 5.2288130684 
+H 0.0000000000 0.0000000000 1.1727606814 
+
