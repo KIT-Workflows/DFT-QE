@@ -1,0 +1,15 @@
+{
+    "workflow_environment": "SimStack",
+    "title": "DFT-QE",
+    "description": "The DFT-QE WaNo implements a wide range of methods available within the QE code",
+    "authors": [
+        "Celso R. C. Rego", "celsorego@kit.edu"
+    ],
+    "version": "0.0.3",
+    "logo": "dft_qe_logo.png",
+    "steps/codes": ["Quatum Espresso", "ASE", "Pymatgen"],
+    "keywords": [
+        "dft",
+        "QE"
+    ]
+}
