@@ -1,5 +1,0 @@
-
-         &INPUT_THERMO
-          what='scf_elastic_constants',
-         /
-        
